@@ -52,7 +52,7 @@ export default class Queue extends EventEmitter {
     } finally {
       this.active.delete(task.id);
       this.emit('end-task', this);
-      this.next();
+      setImmediate(() => this.next());
     }
   }
 
