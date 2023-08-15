@@ -48,7 +48,7 @@ export default class Queue extends EventEmitter {
         await task.run();
       }
     } catch (err) {
-      throw err;
+      this.emit('error', err);
     } finally {
       this.active.delete(task.id);
       this.emit('end-task', this);
