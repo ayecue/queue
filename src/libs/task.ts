@@ -33,12 +33,13 @@ export default class Task extends EventEmitter {
   async run() {
     try {
       this.state = TaskState.Running;
+      this.emit('start', this);
       const result = await this.callback();
       this.state = TaskState.Fulfilled;
       this.emit('done', this, result);
     } catch (err) {
       this.state = TaskState.Failed;
-      this.emit('error', err);
+      this.emit('error', this, err);
     }
   }
 

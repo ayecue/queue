@@ -56,6 +56,14 @@ export default class Queue extends EventEmitter {
     }
   }
 
+  getRunning(): number {
+    return this.active.size;
+  }
+
+  getRemaining(): number {
+    return this.pending.length;
+  }
+
   getState(): QueueState {
     return this.state;
   }
