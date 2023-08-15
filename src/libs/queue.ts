@@ -60,13 +60,15 @@ export default class Queue extends EventEmitter {
     return this.state;
   }
 
-  pause() {
+  pause(): Queue {
     this.state = QueueState.Paused;
+    return this;
   }
 
-  unpause() {
+  unpause(): Queue {
     this.state = QueueState.Idle;
     this.next();
+    return this;
   }
 
   enqueue(options: TaskOptions): Task {
@@ -78,5 +80,10 @@ export default class Queue extends EventEmitter {
 
   dequeue(): Task {
     return this.pending.pop();
+  }
+
+  clear(): Queue {
+    this.pending = [];
+    return this;
   }
 }
