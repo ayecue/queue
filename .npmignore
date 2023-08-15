@@ -1,0 +1,13 @@
+node_modules
+benchmark
+src
+tests
+jest.config.js
+test.js
+test.ts
+example.ts
+tsconfig.json
+.eslintrc
+.gitignore
+.circleci
+coverage
