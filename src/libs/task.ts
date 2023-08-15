@@ -1,3 +1,5 @@
+import EventEmitter from "events";
+
 const { v4: uuidv4 } = require('uuid');
 
 export enum TaskState {
@@ -8,40 +10,35 @@ export enum TaskState {
   Failed
 }
 
-export type TaskCallback = () => Promise<void>;
+export type TaskCallback = () => Promise<any>;
 export type TaskErrorCallback = (err: Error) => void;
 
 export interface TaskOptions {
   callback: TaskCallback;
-  onError?: TaskErrorCallback;
 }
 
-export default class Task {
+export default class Task extends EventEmitter {
   readonly id: string;
 
   private state: TaskState;
   private callback: TaskCallback;
-  private onError: TaskErrorCallback;
 
   constructor(options: TaskOptions) {
+    super();
     this.id = uuidv4();
     this.state = TaskState.Pending;
     this.callback = options.callback;
-    this.onError =
-      options.onError ??
-      ((err) => {
-        throw err;
-      });
   }
 
   async run() {
     try {
       this.state = TaskState.Running;
-      await this.callback();
+      const result = await this.callback();
       this.state = TaskState.Fulfilled;
+      this.emit('done', this, result);
     } catch (err) {
       this.state = TaskState.Failed;
-      this.onError(err);
+      this.emit('error', err);
     }
   }
 
