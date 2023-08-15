@@ -75,14 +75,14 @@ export default class Queue extends EventEmitter {
 
   unpause(): Queue {
     this.state = QueueState.Idle;
-    this.next();
+    setImmediate(() => this.next());
     return this;
   }
 
   enqueue(callback: TaskOptions['callback']): Task {
     const task = new Task({ callback });
     this.pending.push(task);
-    this.next();
+    setImmediate(() => this.next());
     return task;
   }
 
