@@ -44,14 +44,14 @@ export default class Queue extends EventEmitter {
       if (task.getState() !== TaskState.Canceled) {
         this.state = QueueState.Running;
         this.active.set(task.id, task);
-        this.emit('start-task', this);
+        this.emit('start-task', this, task);
         await task.run();
       }
     } catch (err) {
       this.emit('error', err);
     } finally {
       this.active.delete(task.id);
-      this.emit('end-task', this);
+      this.emit('end-task', this, task);
       setImmediate(() => this.next());
     }
   }
