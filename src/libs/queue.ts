@@ -45,7 +45,7 @@ export default class Queue extends EventEmitter {
         this.state = QueueState.Running;
         this.active.set(task.id, task);
         this.emit('start-task', this, task);
-        await task.run();
+        await task.run(this);
       }
     } catch (err) {
       this.emit('error', err);
@@ -66,6 +66,29 @@ export default class Queue extends EventEmitter {
 
   getState(): QueueState {
     return this.state;
+  }
+
+  drain(until: number): Promise<void> {
+    if (until > this.concurrent) {
+      throw new Error(
+        `The until value cannot be higher than the concurrent value.`
+      );
+    }
+
+    return new Promise((resolve) => {
+      const check = () => {
+        if (this.active.size === until) {
+          this.unpause();
+          resolve();
+          return;
+        }
+
+        setImmediate(check);
+      };
+
+      this.pause();
+      check();
+    });
   }
 
   pause(): Queue {

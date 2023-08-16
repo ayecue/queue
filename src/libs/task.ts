@@ -1,5 +1,7 @@
 import EventEmitter from 'events';
 
+import Queue from './queue';
+
 const { v4: uuidv4 } = require('uuid');
 
 export enum TaskState {
@@ -10,7 +12,7 @@ export enum TaskState {
   Failed
 }
 
-export type TaskCallback = () => Promise<any>;
+export type TaskCallback = (queue: Queue, task: Task) => any;
 export type TaskErrorCallback = (err: Error) => void;
 
 export interface TaskOptions {
@@ -30,11 +32,11 @@ export default class Task extends EventEmitter {
     this.callback = options.callback;
   }
 
-  async run() {
+  async run(queue: Queue) {
     try {
       this.state = TaskState.Running;
       this.emit('start', this);
-      const result = await this.callback();
+      const result = await this.callback(queue, this);
       this.state = TaskState.Fulfilled;
       this.emit('done', this, result);
     } catch (err) {
