@@ -105,6 +105,7 @@ export default class Queue extends EventEmitter {
   enqueue(callback: TaskOptions['callback']): Task {
     const task = new Task({ callback });
     this.pending.push(task);
+    this.emit('new-task', task);
     setImmediate(() => this.next());
     return task;
   }
