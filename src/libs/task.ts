@@ -46,8 +46,8 @@ export default class Task extends EventEmitter {
   }
 
   cancel() {
-    if (this.state !== TaskState.Pending) {
-      throw new Error('Cannot cancel non pending task.');
+    if (this.state !== TaskState.Pending && this.state !== TaskState.Running) {
+      throw new Error('Cannot cancel non pending or non running task.');
     }
 
     this.state = TaskState.Canceled;

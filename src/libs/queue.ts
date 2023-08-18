@@ -122,7 +122,7 @@ export default class Queue extends EventEmitter {
     if (gracefully) {
       Array.from(this.active.values()).forEach((item) => item.cancel());
       pending.forEach((item) => item.cancel());
-      this.drain(0)
+      this.drain(0);
     }
 
     this.active = new Map();
