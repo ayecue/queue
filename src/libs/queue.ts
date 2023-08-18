@@ -115,13 +115,18 @@ export default class Queue extends EventEmitter {
   }
 
   clear(gracefully: boolean = false): Queue {
+    const pending = this.pending;
+
+    this.pending = [];
+
     if (gracefully) {
       Array.from(this.active.values()).forEach((item) => item.cancel());
-      this.pending.forEach((item) => item.cancel());
+      pending.forEach((item) => item.cancel());
+      this.drain(0)
     }
 
     this.active = new Map();
-    this.pending = [];
+
     return this;
   }
 }

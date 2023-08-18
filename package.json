@@ -1,6 +1,6 @@
 {
   "name": "node-simple-task-queue",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A simple task queue.",
   "main": "dist/index.js",
   "typings": "dist/index",
