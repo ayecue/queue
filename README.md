@@ -1,1 +1,1 @@
-# node-task-queue
+# node-simple-task-queue
