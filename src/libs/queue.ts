@@ -45,7 +45,7 @@ export default class Queue extends EventEmitter {
         this.state = QueueState.Running;
         this.active.set(task.id, task);
         this.emit('start-task', this, task);
-        await task.run(this);
+        await task.run();
       }
     } catch (err) {
       this.emit('error', err);

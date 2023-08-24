@@ -1,7 +1,5 @@
 import EventEmitter from 'events';
 
-import Queue from './queue';
-
 const { v4: uuidv4 } = require('uuid');
 
 export enum TaskState {
@@ -12,7 +10,7 @@ export enum TaskState {
   Failed
 }
 
-export type TaskCallback = (queue: Queue, task: Task) => any;
+export type TaskCallback = (task: Task) => Promise<any>;
 export type TaskErrorCallback = (err: Error) => void;
 
 export interface TaskOptions {
@@ -32,16 +30,30 @@ export default class Task extends EventEmitter {
     this.callback = options.callback;
   }
 
-  async run(queue: Queue) {
+  async run(): Promise<void> {
     try {
+      if (this.state !== TaskState.Pending) {
+        throw new Error('Cannot only run pending task.');
+      }
+
       this.state = TaskState.Running;
       this.emit('start', this);
-      const result = await this.callback(queue, this);
+
+      const payload = await this.callback(this);
+
+      if (this.state !== TaskState.Running) {
+        throw new Error(
+          'Cannot only return result when state was not canceled.'
+        );
+      }
+
       this.state = TaskState.Fulfilled;
-      this.emit('done', this, result);
+      this.emit('done', this, payload);
     } catch (err) {
-      this.state = TaskState.Failed;
-      this.emit('error', this, err);
+      if (this.state !== TaskState.Failed) {
+        this.state = TaskState.Failed;
+        this.emit('error', this, err);
+      }
     }
   }
 
