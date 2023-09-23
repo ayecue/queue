@@ -68,26 +68,54 @@ export default class Task extends EventEmitter {
   async run(): Promise<void> {
     try {
       this.transitionToState(TaskState.Running);
-      this.emit('start', this);
+      this.emit('start');
 
       const payload = await this.callback(this);
 
       if (this.state === TaskState.Canceled) {
         this.transitionToState(TaskState.Fulfilled);
-        this.emit('done', this, null);
+        this.emit('done', null);
         return;
       }
 
       this.transitionToState(TaskState.Fulfilled);
-      this.emit('done', this, payload);
+      this.emit('done', payload);
     } catch (err) {
       this.transitionToState(TaskState.Failed);
-      this.emit('error', this, err);
+      this.emit('error', err);
     }
   }
 
-  cancel() {
+  cancel(timeout: number = 60000): Promise<void> {
+    const currentState = this.state;
+
     this.transitionToState(TaskState.Canceled);
+
+    if (currentState === TaskState.Pending) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const finalize = () => {
+        this.removeListener('done', onDone);
+        this.removeListener('error', onError);
+        clearTimeout(timer);
+      };
+      const onDone = () => {
+        finalize();
+        resolve();
+      };
+      const onError = (err) => {
+        finalize();
+        reject(err);
+      };
+      const timer = setTimeout(() => {
+        onError(new Error('Cancel has timed out.'));
+      }, timeout);
+
+      this.addListener('done', onDone);
+      this.addListener('error', onError);
+    });
   }
 
   getState(): TaskState {
